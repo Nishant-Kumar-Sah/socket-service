@@ -11,7 +11,7 @@ const redisCache = new Redis();
 
 const io = new Server(httpServer, {
     cors:{
-        origin: "http://localhost:5500",
+        origin: "http://localhost:5173",
         methods: ["GET", "POST"]
     }
     /* options */ 
@@ -34,17 +34,21 @@ io.on("connection", (socket) => {
 });
 
 app.post('/sendPayload',async  (req,res) => {
+    console.log(req.body)
     const { userId , payload } = req.body;
     if(!userId || !payload) {
-        res.status(400).send("invalid request")
+        return res.status(400).send("invalid request")
+    }else {
+
+        console.log("Successfully Recieved Output Payload")
     }
     const socketId = await redisCache.get(userId)
 
     if(socketId) {
         io.to(socketId).emit('submissionPayloadResponse', payload);
-        res.send("payload Sent Successfully")
+        return res.send("payload Sent Successfully")
     }else {
-        res.status(404).send("user not connected")
+        return res.status(404).send("user not connected")
     }
 })
 
